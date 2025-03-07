@@ -1,20 +1,24 @@
-import { Component, input, output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-primary-button',
-  imports: [],
+  imports: [CommonModule],
   template: `
     <button
-      class=" bg-blue-500 text-white w-full border px-5 py-2 rounded-xl shadow-md hover:opacity-90"
+      [ngClass]="
+        customClass ||
+        'bg-blue-500 w-40 text-white border px-5 py-2 rounded-xl shadow-md hover:opacity-90'
+      "
       (click)="btnClicked.emit()"
     >
-      <span class="text-md">{{ label() }}</span>
+      <span class="text-md">{{ label }}</span>
     </button>
   `,
-  styles: ``,
 })
 export class PrimaryButtonComponent {
-  label = input<string>();
+  @Input() label!: string;
+  @Input() customClass?: string;
 
-  btnClicked = output();
+  @Output() btnClicked = new EventEmitter<void>();
 }

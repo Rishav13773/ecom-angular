@@ -1,20 +1,23 @@
 import { Component, computed, inject } from '@angular/core';
 import { CartService } from '../../../services/cart.service';
-import { ButtonComponent } from '../../../components/button/button.component';
 import { PrimaryButtonComponent } from '../../../components/primary-button/primary-button.component';
+import { CartItemComponent } from '../cart-item/cart-item.component';
 
 @Component({
   selector: 'app-order-summary',
-  imports: [PrimaryButtonComponent],
+  imports: [PrimaryButtonComponent, CartItemComponent],
   template: `
     <div class="bg-slate-100 p-6 rounded-xl shadow-xl border">
-      <h2 class="text-2xl">Order Summary</h2>
+      <h2 class="text-2xl">Your Order</h2>
       <div class="flex flex-col gap-4">
         <div class="flex gap-4">
           <span class="text-lg">Total</span>
-          <span class="text-lg font-bold">{{ '$ ' + total() }}</span>
+          <span class="text-lg font-bold">{{ '₹ ' + total() }}</span>
         </div>
-        <app-primary-button label="Proceed to checkout" />
+        @for (item of cartService.cart(); track item.product.id) {
+        <app-cart-item [item]="item" />
+        }
+        <!-- <app-primary-button label="Proceed to checkout" /> -->
       </div>
     </div>
   `,
@@ -26,9 +29,8 @@ export class OrderSummaryComponent {
   total = computed(() => {
     let total = 0;
     for (const item of this.cartService.cart()) {
-      total += item.price;
+      total += item.product.price * item.quantity;
     }
-
     return total;
   });
 }

@@ -1,25 +1,89 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { CartService } from '../../services/cart.service';
-import { CartItemComponent } from './cart-item/cart-item.component';
 import { OrderSummaryComponent } from './order-summary/order-summary.component';
+import { HeaderComponent } from '../../components/header/header.component';
 import { ButtonComponent } from '../../components/button/button.component';
-import { RouterLink } from '@angular/router';
+import { PrimaryButtonComponent } from '../../components/primary-button/primary-button.component';
 
 @Component({
   selector: 'app-cart',
-  imports: [CartItemComponent, OrderSummaryComponent],
+  standalone: true,
+  imports: [
+    OrderSummaryComponent,
+    HeaderComponent,
+    ButtonComponent,
+    PrimaryButtonComponent,
+  ],
   template: `
-    <div class="p-6 flex flex-col gap-4">
-      <h2 class="text-2xl">Shopping cart</h2>
+    <app-header />
 
-      @for (item of cartService.cart(); track item.id) {
-      <app-cart-item [item]="item" />
+    <div class="p-6 flex flex-col gap-6 mb-20">
+      <!-- Empty Cart Message -->
+      @if (cartIsEmpty()) {
+      <div
+        class="text-center text-gray-500 text-lg flex justify-center flex-col items-center"
+      >
+        <img class="w-96 h-96" src="empty.png" alt="cart" />
+        <p>Your cart is empty.</p>
+        <p>Add some products to continue.</p>
+      </div>
+      } @else {
+      <div class="flex flex-col lg:flex-row gap-6 md:mx-40">
+        <!-- Address fill Section -->
+        <div class="bg-white p-6 rounded-lg shadow-md w-full lg:w-3/5">
+          <h2 class="text-2xl font-semibold mb-4">Please enter your address</h2>
+          <form class="flex flex-col gap-4">
+            <input
+              type="text"
+              placeholder="Full name (First and Last name)"
+              class="p-2 border rounded-md w-full"
+            />
+            <input
+              type="text"
+              placeholder="Mobile number"
+              class="p-2 border rounded-md w-full"
+            />
+            <input
+              type="text"
+              placeholder="Pincode"
+              class="p-2 border rounded-md w-full"
+            />
+            <input
+              type="text"
+              placeholder="Flat, House no., Building, Company, Apartment"
+              class="p-2 border rounded-md w-full"
+            />
+            <input
+              type="text"
+              placeholder="Area, Street, Sector, Village"
+              class="p-2 border rounded-md w-full"
+            />
+            <input
+              type="text"
+              placeholder="Landmark"
+              class="p-2 border rounded-md w-full"
+            />
+            <input
+              type="text"
+              placeholder="Town/City"
+              class="p-2 border rounded-md w-full"
+            />
+            <app-primary-button label="Continue" />
+          </form>
+        </div>
+
+        <!-- Order Summary Section -->
+        <div class="bg-white p-6 rounded-lg shadow-md w-full lg:w-2/5">
+          <app-order-summary />
+        </div>
+      </div>
       }
-      <app-order-summary />
     </div>
   `,
   styles: ``,
 })
 export class CartComponent {
   cartService = inject(CartService);
+
+  cartIsEmpty = computed(() => this.cartService.cart().length === 0);
 }

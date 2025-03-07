@@ -8,24 +8,34 @@ import { CartService } from '../../../services/cart.service';
   imports: [ButtonComponent],
   template: `
     <div
-      class="bg-white shadow-md border rounded-xl p-6 flex gap-4 items-center"
+      class="bg-white shadow-md border rounded-xl p-6 flex flex-col md:flex-row gap-4 items-center md:justify-between"
     >
-      <img [src]="item().image" class="w-[50px] h-[50px] object-contain" />
-      <div class="flex flex-col">
-        <span class="text-md font-bold">{{ item().title }}</span>
-        <span class="text-sm"> {{ '$' + item().price }}</span>
+      <img
+        [src]="item().product.image"
+        class="w-[50px] h-[50px] object-contain"
+      />
+
+      <div class="flex flex-col flex-grow text-center md:text-left">
+        <span class="text-md font-bold">{{ item().product.name }}</span>
+        <div class="mt-4">
+          <span class="text-sm"> {{ '₹' + item().product.price }}</span>
+          <span class="ml-2 bg-red-600 text-white p-2 rounded-md">
+            {{ 'Qty' + ' ' + item().quantity }}
+          </span>
+        </div>
       </div>
-      <div class="flex-1"></div>
+
       <app-button
         label="Remove"
-        (btnClicked)="cartService.removeFromCart(item())"
+        (btnClicked)="cartService.removeFromCart(item().product)"
+        class="ml-auto md:ml-0 md:self-end"
       />
     </div>
   `,
   styles: ``,
 })
 export class CartItemComponent {
-  item = input.required<Product>();
+  item = input.required<{ product: Product; quantity: number }>();
 
   cartService = inject(CartService);
 }
