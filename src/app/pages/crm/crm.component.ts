@@ -40,7 +40,7 @@ import { PortalService } from '../../services/portal.service';
             <tr *ngFor="let product of products[1]" class="hover:bg-gray-50">
               <td class="border p-3">
                 <img
-                  [src]="product.imgUrl"
+                  [src]="'http://localhost:5053' + product.imgUrl"
                   alt="Product"
                   class="w-12 h-12 rounded-md object-cover"
                 />
@@ -157,19 +157,16 @@ export class CrmComponent implements OnInit {
     this.showModal = true;
   }
 
-  saveProduct(product: any) {
-    console.log('product', product); // Debugging
+  saveProduct(formData: FormData) {
     if (this.isEditMode) {
-      // Update product
       this.portalService
-        .updateProduct(product.productId, product)
+        .updateProduct(this.selectedProduct.productId, formData)
         .subscribe(() => {
           this.fetchProducts();
           this.showModal = false;
         });
     } else {
-      // Add new product
-      this.portalService.addProduct(product).subscribe(() => {
+      this.portalService.addProduct(formData).subscribe(() => {
         this.fetchProducts();
         this.showModal = false;
       });

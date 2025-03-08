@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, OnInit, signal } from '@angular/core';
 import { CartService } from '../../services/cart.service';
 import { OrderSummaryComponent } from './order-summary/order-summary.component';
 import { HeaderComponent } from '../../components/header/header.component';
@@ -74,7 +74,7 @@ import { PrimaryButtonComponent } from '../../components/primary-button/primary-
 
         <!-- Order Summary Section -->
         <div class="bg-white p-6 rounded-lg shadow-md w-full lg:w-2/5">
-          <app-order-summary />
+          <app-order-summary [cart]="cart()" />
         </div>
       </div>
       }
@@ -84,6 +84,19 @@ import { PrimaryButtonComponent } from '../../components/primary-button/primary-
 })
 export class CartComponent {
   cartService = inject(CartService);
+  cart = this.cartService.getCart();
+  // cart = signal<any[]>([]); // Signal to store cart items
 
-  cartIsEmpty = computed(() => this.cartService.cart().length === 0);
+  // ngOnInit(): void {
+  //   this.cartService.getCartById().subscribe({
+  //     next: (cartItems) => {
+  //       this.cart.set(cartItems);
+  //       console.log('Cart updated:', cartItems);
+  //     },
+  //     error: (error) => {
+  //       console.error('Error fetching cart:', error);
+  //     },
+  //   });
+  // }
+  cartIsEmpty = computed(() => this.cart().length === 0);
 }

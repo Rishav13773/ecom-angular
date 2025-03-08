@@ -1,10 +1,11 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, Input } from '@angular/core';
 import { CartService } from '../../../services/cart.service';
 import { PrimaryButtonComponent } from '../../../components/primary-button/primary-button.component';
 import { CartItemComponent } from '../cart-item/cart-item.component';
 
 @Component({
   selector: 'app-order-summary',
+  standalone: true,
   imports: [PrimaryButtonComponent, CartItemComponent],
   template: `
     <div class="bg-slate-100 p-6 rounded-xl shadow-xl border">
@@ -12,11 +13,14 @@ import { CartItemComponent } from '../cart-item/cart-item.component';
       <div class="flex flex-col gap-4">
         <div class="flex gap-4">
           <span class="text-lg">Total</span>
-          <span class="text-lg font-bold">{{ '₹ ' + total() }}</span>
+          <span class="text-lg font-bold">{{ '₹ ' + totalPrice() }}</span>
         </div>
-        @for (item of cartService.cart(); track item.product.id) {
+
+        <!-- Loop through extracted cart items -->
+        @for (item of cartItems(); track item.product.productId) {
         <app-cart-item [item]="item" />
         }
+
         <!-- <app-primary-button label="Proceed to checkout" /> -->
       </div>
     </div>
@@ -24,13 +28,14 @@ import { CartItemComponent } from '../cart-item/cart-item.component';
   styles: ``,
 })
 export class OrderSummaryComponent {
-  cartService = inject(CartService);
+  @Input() cart: any = {}; //  receive the cart object
 
-  total = computed(() => {
-    let total = 0;
-    for (const item of this.cartService.cart()) {
-      total += item.product.price * item.quantity;
-    }
-    return total;
-  });
+  cartItems = computed(() => this.cart?.$values ?? []); // Extracts $values array
+
+  totalPrice = computed(() =>
+    this.cartItems().reduce(
+      (total: any, item: any) => total + item.totalPrice,
+      0
+    )
+  );
 }

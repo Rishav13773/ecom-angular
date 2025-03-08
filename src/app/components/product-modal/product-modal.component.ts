@@ -128,12 +128,20 @@ export class ProductModalComponent {
   }
 
   handleSave() {
+    const formData = new FormData();
+
+    formData.append('name', this.product.name);
+    formData.append('price', this.product.price);
+    formData.append('salePrice', this.product.salePrice);
+    formData.append('stock', this.product.stock);
+    formData.append('published', String(this.product.published));
+
     if (this.photoFile) {
-      console.log('Local image selected:', this.photoFile);
-      this.product.imgUrl = URL.createObjectURL(this.photoFile); // Store local file path
+      formData.append('imageFile', this.photoFile);
+    } else if (this.product.imgUrl?.trim()) {
+      formData.append('imgUrl', this.product.imgUrl);
     }
 
-    console.log('Saving product with:', this.product);
-    this.saveProduct.emit(this.product);
+    this.saveProduct.emit(formData);
   }
 }

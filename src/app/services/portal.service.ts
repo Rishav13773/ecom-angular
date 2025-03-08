@@ -17,12 +17,13 @@ export class PortalService {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
-  addProduct(product: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, product);
+  addProduct(productData: FormData): Observable<any> {
+    return this.http.post(this.apiUrl, productData);
   }
 
-  updateProduct(id: number, product: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, product);
+  updateProduct(id: number, productData: FormData): Observable<any> {
+    console.log(FormData);
+    return this.http.put(`${this.apiUrl}/${id}`, productData);
   }
 
   deleteProduct(id: number): Observable<any> {

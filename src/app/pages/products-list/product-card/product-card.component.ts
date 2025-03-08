@@ -5,6 +5,8 @@ import { PrimaryButtonComponent } from '../../../components/primary-button/prima
 import { MinusButtonComponent } from '../../../components/button/minus-button.component';
 import { PlusButtonComponent } from '../../../components/button/plus-button.component';
 import { Router } from '@angular/router';
+import { PortalService } from '../../../services/portal.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-product-card',
@@ -15,7 +17,7 @@ import { Router } from '@angular/router';
     >
       <div class="mx-auto">
         <img
-          [src]="product().image"
+          [src]="'http://localhost:5053' + product().imgUrl"
           class="w-[200px] h-[100px] object-contain"
         />
       </div>
@@ -54,6 +56,8 @@ import { Router } from '@angular/router';
 export class ProductCardComponent {
   constructor(private router: Router) {}
 
+  productService = inject(PortalService);
+  userAuth = inject(AuthService);
   cartService = inject(CartService);
   product = input.required<Product>();
   stock = signal(0);
@@ -71,16 +75,43 @@ export class ProductCardComponent {
   }
 
   addToCart() {
+    console.log('Product:', this.product());
     if (this.stock() > 0) {
-      this.cartService.addToCart(this.product(), this.stock());
-      this.stock.set(0);
-      this.router.navigate(['/cart']);
+      this.cartService.addToCart(this.product(), this.stock()).subscribe(() => {
+        console.log('REACHED HERE');
+        // Update the product stock only after a successful API call
+        const updatedStock = this.product().stock! - this.stock();
+        const updatedProduct = new FormData();
+        updatedProduct.append('stock', updatedStock.toString());
+        updatedProduct.append('imgUrl', this.product().imgUrl);
+        console.log(updatedProduct);
+
+        this.productService
+          .updateProduct(this.product().productId, updatedProduct)
+          .subscribe(() => {
+            this.stock.set(0);
+            this.router.navigate(['/cart']);
+          });
+      });
     } else {
       var stock = this.product().stock || 0;
       if (stock > 0) {
-        this.cartService.addToCart(this.product(), this.stock() + 1);
-        this.stock.set(0);
-        this.router.navigate(['/cart']);
+        this.cartService
+          .addToCart(this.product(), this.stock() + 1)
+          .subscribe(() => {
+            // Update the stock again if only one is added
+            const updatedStock = stock - 1;
+            const updatedProduct = new FormData();
+            updatedProduct.append('stock', updatedStock.toString());
+            updatedProduct.append('imgUrl', this.product().imgUrl);
+
+            this.productService
+              .updateProduct(this.product().productId, updatedProduct)
+              .subscribe(() => {
+                this.stock.set(0);
+                this.router.navigate(['/cart']);
+              });
+          });
       }
     }
   }

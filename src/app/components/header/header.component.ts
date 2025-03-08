@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CartService } from '../../services/cart.service';
 import { RouterLink } from '@angular/router';
 import { PrimaryButtonComponent } from '../primary-button/primary-button.component';
@@ -36,7 +36,7 @@ import { UserDropdownComponent } from '../user-dropdown/user-dropdown.component'
         <a class="relative" href="" routerLink="/cart">
           <span
             class="absolute bg-red-600 rounded-full p-1 text-white text-xs left-4 bottom-5"
-            >{{ cartLabel() }}</span
+            >{{ cartLength() }}</span
           >
           <i
             class="pi pi-shopping-bag"
@@ -48,10 +48,23 @@ import { UserDropdownComponent } from '../user-dropdown/user-dropdown.component'
   `,
   styles: ``,
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   constructor(public authService: AuthService) {}
   cartService = inject(CartService);
-  cartLabel = computed(() => this.cartService.cart().length);
+  cart: any = signal<any[]>([]);
+  cartLength = signal<number>(0);
+  ngOnInit(): void {
+    this.cartService.getCartById().subscribe({
+      next: (cartItems: any) => {
+        this.cart.set(cartItems);
+        console.log('Cart updated:', cartItems.$values.length);
+        this.cartLength.set(cartItems.$values.length);
+      },
+      error: (error) => {
+        console.error('Error fetching cart:', error);
+      },
+    });
+  }
 
   isLoggedIn() {
     return this.authService.isLoggedIn();

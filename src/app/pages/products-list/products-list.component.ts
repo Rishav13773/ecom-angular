@@ -6,10 +6,13 @@ import { PortalService } from '../../services/portal.service';
 
 export type Product = {
   id: number;
-  name: string;
-  price: number;
-  image: string;
+  productId: number;
+  name?: string;
+  price?: number;
+  salePrice?: number;
+  imgUrl: string;
   stock?: number;
+  published?: boolean;
 };
 
 @Component({
@@ -19,7 +22,7 @@ export type Product = {
     <div class="mb-20">
       <app-header />
       <div class="p-8 grid grid-cols-1 gap-6 md:grid-cols-3 md:mx-10 lg:mx-48">
-        @for (product of products; track product.id) {
+        @for (product of products; track product.$id) {
         <app-product-card [product]="product" />
         }
       </div>
