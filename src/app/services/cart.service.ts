@@ -3,19 +3,20 @@ import { Product } from '../pages/products-list/products-list.component';
 import { catchError, Observable, of, tap, throwError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from './auth.service';
+import { getUser } from '../utils/getUser';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CartService {
   constructor() {
-    this.loadCart(); // Fetch cart data once when service is initialized
+    this.loadCart(); // Fetch cart data once when service is started
   }
 
   private http = inject(HttpClient);
   private authService = inject(AuthService);
 
-  private apiUrl = 'http://localhost:5053/api/cart'; // API base URL
+  private apiUrl = 'http://localhost:5053/api/cart';
   cart = signal<{ product: Product; quantity: number; cartId: number }[]>([]);
 
   private loadCart(): void {
@@ -42,7 +43,7 @@ export class CartService {
 
     this.http.get<any[]>(`${this.apiUrl}/GetCart/${userId}`).subscribe({
       next: (cartItems) => {
-        this.cart.set(cartItems); // ✅ Store cart in signal
+        this.cart.set(cartItems); //  Store cart in signal
         console.log('Cart loaded:', cartItems);
       },
       error: (error) => {
@@ -59,28 +60,28 @@ export class CartService {
   addToCart(product: Product, quantity: number): Observable<any> {
     const userToken = localStorage.getItem('UserToken');
 
-    if (!userToken) {
-      console.error('User not logged in.');
-      return new Observable(); // Prevent API call if userToken is missing
-    }
+    // if (!userToken) {
+    //   console.error('User not logged in.');
+    //   return new Observable(); // Prevent API call if userToken is missing
+    // }
 
-    let parsedToken;
-    try {
-      parsedToken = JSON.parse(userToken);
-    } catch (error) {
-      console.error('Invalid token format:', error);
-      return new Observable();
-    }
+    // let parsedToken;
+    // try {
+    //   parsedToken = JSON.parse(userToken);
+    // } catch (error) {
+    //   console.error('Invalid token format:', error);
+    //   return new Observable();
+    // }
 
-    const userId = parsedToken?.userId;
+    // const userId = parsedToken?.userId;
 
-    if (!userId || typeof userId !== 'number') {
-      console.error('Invalid User ID:', userId);
-      return new Observable();
-    }
+    // if (!userId || typeof userId !== 'number') {
+    //   console.error('Invalid User ID:', userId);
+    //   return new Observable();
+    // }
 
     const payload = {
-      userId,
+      userId: getUser(),
       productId: product.productId,
       quantity,
     };
@@ -95,7 +96,7 @@ export class CartService {
 
     if (!userToken) {
       console.error('User not logged in.');
-      return of([]); // Return an empty array instead of an Observable
+      return of([]); // Return an empty array
     }
 
     let parsedToken;
@@ -121,17 +122,14 @@ export class CartService {
     );
   }
   removeFromCart(cartId: number): Observable<any> {
-    console.log('Removing cart item with ID:', cartId);
-
-    return this.http.delete(`${this.apiUrl}/RemoveFromCart/${cartId}`).pipe(
-      tap(() => {
-        // Update the cart by filtering out the removed item
-        this.cart.set(this.cart().filter((item) => item.cartId !== cartId));
-      }),
-      catchError((error) => {
-        console.error('Error removing item:', error);
-        return throwError(() => new Error('Failed to remove item'));
-      })
-    );
+    return this.http
+      .delete<{ message: string }>(`${this.apiUrl}/RemoveFromCart/${cartId}`)
+      .pipe(
+        tap((response) => console.log(response.message)),
+        catchError((error) => {
+          console.error('Error removing item:', error);
+          return throwError(() => new Error('Failed to remove item'));
+        })
+      );
   }
 }

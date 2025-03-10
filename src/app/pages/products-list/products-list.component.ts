@@ -48,7 +48,7 @@ export class ProductsListComponent implements OnInit {
         this.products = Array.isArray(data) ? data : [];
       }
 
-      // Ensure unique IDs
+      // unique IDs
       this.products = this.products.map((product, index) => ({
         ...product,
         id: product.id ?? index, // Assign index if id is missing
